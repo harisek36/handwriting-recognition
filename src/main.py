@@ -9,22 +9,27 @@ from SamplePreprocessor import preprocess
 import glob
 import numpy as np
 import pathlib
-# import requests
-# import threading
-# import time
-# import os
-# from flask import jsonify
-# from flask_cors import CORS
-# import re
-# from flask import Flask, request
-# import sys
-# from datetime import datetime
+import requests
+import threading
+import time
+import os
+from flask import jsonify
+from flask_cors import CORS
+import re
+from flask import Flask, request
+import sys
+import base64
+from werkzeug.utils import secure_filename
 
-# app = Flask(__name__)
-# cors = CORS(app, resources={r"/*": {"origins": "*"}})
+from datetime import datetime
 
+app = Flask(__name__)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
+UPLOAD_FOLDER = '/Users/harishsekar/Documents/Project/DataScience/HTC_GLOBAL/SimpleHTR-master/src/imagesAngular'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+model = ''
 
 class FilePaths:
     "filenames and paths to data"
@@ -148,19 +153,33 @@ def main():
         model = Model(open(FilePaths.fnCharList).read(), args.beamsearch, mustRestore=True)
         infer(model, FilePaths.fnInfer)
 
-# def inferRestImage(model, fnImg):
+@app.route('/handwritting', methods=['POST'])
+def inferRestImage():
 
-#     img = preprocess(cv2.imread(fnImg, cv2.IMREAD_GRAYSCALE), Model.imgSize)
-#     batch = Batch(None, [img] * Model.batchSize) # fill all batch elements with same input image
-#     recognized = model.inferBatch(batch) # recognize text
-#     return recognized[0]
+    print(open('/Users/harishsekar/Documents/Project/DataScience/HTC_GLOBAL/SimpleHTR-master/model/accuracy.txt').read())
+    model = Model(open(FilePaths.fnCharList).read(), useBeamSearch=True, mustRestore=True)
 
-# @app.before_first_request     
-# def mainModelRun(): 
-#     main()   
+    if 'imagefile' in request.files:
+        imageFile = request.files['imagefile']
+        filename = secure_filename(imageFile.filename)
+        imageFile.save('/Users/harishsekar/Documents/Project/DataScience/HTC_GLOBAL/SimpleHTR-master/src/imagesAngular/'+filename)
 
+        img = preprocess(cv2.imread('/Users/harishsekar/Documents/Project/DataScience/HTC_GLOBAL/SimpleHTR-master/src/imagesAngular/'+filename, cv2.IMREAD_GRAYSCALE), Model.imgSize)
+        batch = Batch(None, [img] * Model.batchSize) # fill all batch elements with same input image
+        recognized = model.inferBatch(batch) # recognize text
+        return jsonify(text = recognized[0])
+
+        # return jsonify(text = "Success")
+    return jsonify(text = "Success")
+
+
+
+@app.route("/start")
+def initialSetup():
+    return jsonify(status = 'initial setup started')
 
 if __name__ == '__main__':
-    main() 
+    app.run()
+
 
 
