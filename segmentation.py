@@ -28,9 +28,9 @@ def getContours(contours, hierarchy, tImage, originalIm):
     return reversed(lst_im)
 
 def main():
-    
-    large = cv2.imread('blob.jpg')
-    
+
+    large = cv2.imread('blob.png')
+
     # downsample and use it for processing
     rgb = cv2.pyrDown(large)
     # apply grayscale
@@ -44,29 +44,29 @@ def main():
     # connect horizontally oriented regions
     connected = cv2.morphologyEx(bw, cv2.MORPH_OPEN, morph_kernel)
     # find contours
-    im2, contours, hierarchy = cv2.findContours(connected, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # im2, contours, hierarchy = cv2.findContours(connected, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(connected, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     sPath='./output'
 
     # Extract the list of segmented blocks
     lst=getContours(contours, hierarchy, rgb, small)
-    
-    folder = os.path.join(os.getcwd(), 'segments')  
-    os.path.isdir(folder) or os.mkdir(folder) 
 
-          
+    folder = os.path.join(os.getcwd(), 'segments')
+    os.path.isdir(folder) or os.mkdir(folder)
+
+
     for idx,itm in enumerate(lst):
-        
+
            cv2.imwrite(os.path.join(sPath,str(idx)+'.jpg'),itm)
            if itm.size < 30:
               continue
            imsave(os.path.join(folder,str(idx)+'.jpg'),itm)
-        
-        
+
+
     cv2.imshow('',rgb)
     cv2.waitKey(0)
 
 
 if __name__=='__main__':
     main()
-

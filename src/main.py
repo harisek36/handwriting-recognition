@@ -170,7 +170,7 @@ def inferRestImage():
         return jsonify(text = recognized[0])
 
         # return jsonify(text = "Success")
-    return jsonify(text = "Success")
+    return jsonify(text = "Image not found")
 
 
 
